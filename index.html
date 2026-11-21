@@ -166,8 +166,11 @@
       bottom: 18px;
       transform: translateX(-50%);
       display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
       align-items: center;
-      gap: 6px;
+      gap: 4px;
+      max-width: min(94vw, 760px);
       padding: 6px;
       border: 1px solid rgba(148, 163, 184, 0.22);
       border-radius: 999px;
@@ -255,20 +258,35 @@
     <div class="pl-bar" aria-hidden="true"><span></span></div>
   </div>
 
-  <!-- demo-only backdrop switcher -->
-  <div class="demo-bar" role="group" aria-label="Demo backdrop">
+  <!-- demo-only controls -->
+  <div class="demo-bar" role="group" aria-label="Demo controls">
     <span>Backdrop</span>
     <button type="button" data-set="site" aria-pressed="true">Site</button>
     <button type="button" data-set="checker" aria-pressed="false">Checker</button>
     <button type="button" data-set="light" aria-pressed="false">Light</button>
+    <span>Loader</span>
+    <button type="button" data-loader="show" aria-pressed="true">Show</button>
+    <button type="button" data-loader="hide" aria-pressed="false">Hide</button>
   </div>
 
   <script>
-    // demo only — proves the loader layer is transparent
-    document.querySelectorAll(".demo-bar button").forEach(function (btn) {
+    // demo only — proves the loader is a transparent, removable layer
+    const preloader = document.querySelector(".preloader");
+
+    document.querySelectorAll("[data-set]").forEach(function (btn) {
       btn.addEventListener("click", function () {
         document.documentElement.dataset.backdrop = btn.dataset.set;
-        document.querySelectorAll(".demo-bar button").forEach(function (b) {
+        document.querySelectorAll("[data-set]").forEach(function (b) {
+          b.setAttribute("aria-pressed", String(b === btn));
+        });
+      });
+    });
+
+    document.querySelectorAll("[data-loader]").forEach(function (btn) {
+      btn.addEventListener("click", function () {
+        const hide = btn.dataset.loader === "hide";
+        preloader.classList.toggle("is-done", hide);
+        document.querySelectorAll("[data-loader]").forEach(function (b) {
           b.setAttribute("aria-pressed", String(b === btn));
         });
       });
