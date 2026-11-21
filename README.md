@@ -1,5 +1,13 @@
 # Nexus Preloader
 
+**▶ Live demo: <https://nassic-badar.github.io/Css-Preloader/>**
+&nbsp;·&nbsp; [![Live demo](https://img.shields.io/badge/live%20demo-GitHub%20Pages-22d3ee?style=flat-square)](https://nassic-badar.github.io/Css-Preloader/)
+
+> Every push to `main` is published automatically to GitHub Pages
+> (Settings → Pages → Source: *Deploy from a branch* → `main` / `/ (root)`).
+> If you just merged a change, the CDN can take ~1–2 minutes; hard-refresh
+> or open <https://nassic-badar.github.io/Css-Preloader/?v=2> to bust the cache.
+
 A futuristic, pure-CSS loading overlay: counter-rotating HUD rings, a radar sweep,
 an orbiting particle, a pulsing core and a scanning progress bar.
 
@@ -12,7 +20,7 @@ centre of the viewport.
 | File | What it is |
 | --- | --- |
 | `loader.css` | The loader only. No `body`, `html` or global rules — safe to drop into any project. |
-| `index.html` | A demo page with a fake website behind the loader, plus a backdrop switcher. |
+| `index.html` | A demo page with a fake website behind the loader, a backdrop switcher and a show/hide toggle. |
 
 ## Use it on your site
 
