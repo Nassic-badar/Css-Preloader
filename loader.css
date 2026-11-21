@@ -1,77 +1,300 @@
-body{
-    background-color: black;
-    margin: 0px;
+/* ============================================================
+   ORBIT PRELOADER  ·  v2 "NEXUS"
+   Fully transparent, site-friendly loading overlay.
+   Only the loader renders — no page background, no layout shift.
+   Drop the .preloader markup on any page and this CSS just works.
+   ============================================================ */
+
+.preloader {
+  /* tweak these three and the whole thing rescales */
+  --pl-accent: #22d3ee;
+  --pl-accent-2: #818cf8;
+  --pl-size: clamp(190px, 46vmin, 250px);
+  --pl-mono: ui-monospace, "SFMono-Regular", "JetBrains Mono", Menlo, Consolas, monospace;
+
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+
+  display: grid;
+  place-content: center;
+  justify-items: center;
+  gap: clamp(16px, 3vmin, 26px);
+
+  /* transparency is the whole point */
+  background: transparent;
+  border: 0;
+
+  /* clicks, scrolls and hovers pass straight through to the website */
+  pointer-events: none;
+  isolation: isolate;
+
+  font-family: var(--pl-mono);
+  opacity: 1;
+  transition: opacity 0.45s ease, visibility 0.45s ease;
 }
 
-.center {
-    position: absolute;
-    margin: auto;
-    top: 0;
-    right: 0;
-    bottom: 0;
-    left: 0;
-    width: 100px;
-    height: 80px;
+/* fade the overlay away when loading finishes: JS -> preloader.classList.add("is-done") */
+.preloader.is-done {
+  opacity: 0;
+  visibility: hidden;
+}
+
+/* ---------- stage ---------- */
+.pl-scene {
+  position: relative;
+  width: var(--pl-size);
+  height: var(--pl-size);
+  display: grid;
+  place-items: center;
+}
+
+/* soft ambient halo behind everything (still transparent at the edges) */
+.pl-halo {
+  position: absolute;
+  inset: 6%;
+  border-radius: 50%;
+  background: radial-gradient(circle, color-mix(in srgb, var(--pl-accent) 22%, transparent) 0%, transparent 62%);
+  animation: pl-pulse 3.4s ease-in-out infinite;
+  z-index: 0;
+}
+
+/* radar sweep sitting behind the rings */
+.pl-sweep {
+  position: absolute;
+  inset: 16%;
+  border-radius: 50%;
+  background: conic-gradient(from 0deg,
+      color-mix(in srgb, var(--pl-accent) 30%, transparent) 0deg,
+      color-mix(in srgb, var(--pl-accent) 8%, transparent) 38deg,
+      transparent 78deg);
+  animation: pl-spin 2.8s linear infinite;
+  z-index: 1;
+}
+
+/* fine tick ring around the outside */
+.pl-ticks {
+  position: absolute;
+  inset: -2%;
+  border-radius: 50%;
+  background: repeating-conic-gradient(from 0deg,
+      color-mix(in srgb, var(--pl-accent) 70%, transparent) 0deg 0.7deg,
+      transparent 0.7deg 8deg);
+  -webkit-mask: radial-gradient(farthest-side,
+      transparent calc(100% - 12px), #000 calc(100% - 10px),
+      #000 calc(100% - 7px), transparent calc(100% - 5px));
+  mask: radial-gradient(farthest-side,
+      transparent calc(100% - 12px), #000 calc(100% - 10px),
+      #000 calc(100% - 7px), transparent calc(100% - 5px));
+  opacity: 0.55;
+  animation: pl-spin 30s linear infinite reverse;
+  z-index: 2;
+}
+
+/* ---------- rotating rings (built with masked conic gradients) ---------- */
+.pl-arc {
+  position: absolute;
+  border-radius: 50%;
+  -webkit-mask: radial-gradient(farthest-side,
+      transparent calc(100% - var(--t)), #000 calc(100% - var(--t) + 0.6px));
+  mask: radial-gradient(farthest-side,
+      transparent calc(100% - var(--t)), #000 calc(100% - var(--t) + 0.6px));
+  will-change: transform;
+}
+
+/* comet ring — fastest, cyan */
+.pl-arc--a {
+  --t: 3px;
+  inset: 0;
+  background: conic-gradient(from 0deg,
+      transparent 0%,
+      color-mix(in srgb, var(--pl-accent) 18%, transparent) 42%,
+      var(--pl-accent) 84%,
+      #e0faff 97%,
+      transparent 100%);
+  filter: drop-shadow(0 0 6px color-mix(in srgb, var(--pl-accent) 85%, transparent));
+  animation: pl-spin 2.2s cubic-bezier(0.55, 0.15, 0.45, 0.85) infinite;
+  z-index: 3;
+}
+
+/* indigo counter-rotating ring */
+.pl-arc--b {
+  --t: 2px;
+  inset: 13%;
+  background: conic-gradient(from 130deg,
+      transparent 0%,
+      color-mix(in srgb, var(--pl-accent-2) 14%, transparent) 55%,
+      var(--pl-accent-2) 88%,
+      #c7d2fe 97%,
+      transparent 100%);
+  filter: drop-shadow(0 0 6px color-mix(in srgb, var(--pl-accent-2) 80%, transparent));
+  animation: pl-spin 3.6s linear infinite reverse;
+  z-index: 4;
+}
+
+/* thin twin-arc detail ring */
+.pl-arc--c {
+  --t: 1.5px;
+  inset: 25%;
+  background: conic-gradient(from 210deg,
+      #e0faff 0% 5%,
+      transparent 5% 44%,
+      var(--pl-accent) 44% 51%,
+      transparent 51% 100%);
+  opacity: 0.85;
+  animation: pl-spin 1.7s linear infinite;
+  z-index: 5;
+}
+
+/* orbiting particle */
+.pl-orbit {
+  position: absolute;
+  inset: 8%;
+  border-radius: 50%;
+  animation: pl-spin 6.5s linear infinite;
+  z-index: 6;
+}
+
+.pl-orbit::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 50%;
+  width: 7px;
+  height: 7px;
+  margin: -3.5px 0 0 -3.5px;
+  border-radius: 50%;
+  background: #f0feff;
+  box-shadow:
+    0 0 8px 2px color-mix(in srgb, var(--pl-accent) 90%, transparent),
+    0 0 22px 6px color-mix(in srgb, var(--pl-accent) 35%, transparent);
+}
+
+/* ---------- glowing core ---------- */
+.pl-core {
+  position: relative;
+  width: calc(var(--pl-size) * 0.3);
+  aspect-ratio: 1;
+  display: grid;
+  place-items: center;
+  border: 1px solid color-mix(in srgb, var(--pl-accent) 75%, transparent);
+  border-radius: 28%;
+  transform: rotate(45deg);
+  background:
+    linear-gradient(135deg,
+      color-mix(in srgb, var(--pl-accent) 20%, transparent),
+      color-mix(in srgb, var(--pl-accent-2) 6%, transparent));
+  box-shadow:
+    inset 0 0 22px color-mix(in srgb, var(--pl-accent) 38%, transparent),
+    0 0 26px color-mix(in srgb, var(--pl-accent) 30%, transparent);
+  animation: pl-core 2.9s ease-in-out infinite;
+  z-index: 7;
+}
+
+.pl-core::before {
+  content: "";
+  position: absolute;
+  inset: 4px;
+  border-radius: inherit;
+  border: 1px solid color-mix(in srgb, var(--pl-accent) 28%, transparent);
+}
+
+.pl-core span {
+  width: 26%;
+  aspect-ratio: 1;
+  border-radius: 50%;
+  background: #d9fdff;
+  box-shadow:
+    0 0 10px 2px var(--pl-accent),
+    0 0 30px 8px color-mix(in srgb, var(--pl-accent) 45%, transparent);
+  animation: pl-pulse 1.45s ease-in-out infinite;
+}
+
+/* ---------- HUD label + progress sweep ---------- */
+.pl-label {
+  display: flex;
+  align-items: center;
+  gap: 0.6em;
+  font-size: clamp(10px, 1.15vmin, 12px);
+  letter-spacing: 0.42em;
+  text-transform: uppercase;
+  color: #cffafe;
+  /* glow + a hint of dark edge keeps it legible on light sites too */
+  text-shadow:
+    0 0 14px color-mix(in srgb, var(--pl-accent) 80%, transparent),
+    0 1px 2px rgba(2, 8, 16, 0.45);
+  -webkit-font-smoothing: antialiased;
+}
+
+.pl-label > span:last-child {
+  display: inline-flex;
+  min-width: 1.6em;
+}
+
+.pl-label i {
+  font-style: normal;
+  animation: pl-blink 1.4s steps(1, end) infinite;
+}
+.pl-label i:nth-child(2) { animation-delay: 0.2s; }
+.pl-label i:nth-child(3) { animation-delay: 0.4s; }
+
+.pl-bar {
+  position: relative;
+  width: calc(var(--pl-size) * 0.72);
+  height: 2px;
+  border-radius: 2px;
+  background: color-mix(in srgb, var(--pl-accent) 16%, transparent);
+  overflow: hidden;
+}
+
+.pl-bar span {
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: 45%;
+  border-radius: inherit;
+  background: linear-gradient(90deg, transparent, var(--pl-accent) 55%, #e0faff, transparent);
+  box-shadow: 0 0 14px var(--pl-accent);
+  animation: pl-bar 1.9s cubic-bezier(0.65, 0, 0.35, 1) infinite;
+}
+
+/* ---------- keyframes ---------- */
+@keyframes pl-spin {
+  to { transform: rotate(360deg); }
+}
+
+@keyframes pl-pulse {
+  0%, 100% { opacity: 0.55; transform: scale(0.94); }
+  50%      { opacity: 1;    transform: scale(1.06); }
+}
+
+@keyframes pl-core {
+  0%, 100% { transform: rotate(45deg) scale(0.96); }
+  50%      { transform: rotate(45deg) scale(1.04); }
+}
+
+@keyframes pl-blink {
+  0%, 49%   { opacity: 1; }
+  50%, 100% { opacity: 0.15; }
+}
+
+@keyframes pl-bar {
+  0%   { transform: translateX(-120%); }
+  100% { transform: translateX(320%); }
+}
+
+/* ---------- accessibility ---------- */
+@media (prefers-reduced-motion: reduce) {
+  .pl-arc,
+  .pl-orbit,
+  .pl-sweep,
+  .pl-ticks,
+  .pl-core,
+  .pl-core span,
+  .pl-halo,
+  .pl-label i,
+  .pl-bar span {
+    animation-duration: 9s;
+    animation-timing-function: linear;
   }
-
-.outer{
-    border-top: 1px solid yellow;
-    border-bottom: 1px solid yellow;
-    border-radius: 100%;
-    padding: 0px;
-    animation: rotate-outer 5s infinite linear;
-}
-
-.middle{
-    border-left: 1px solid yellow;
-    border-right: 1px solid yellow;
-    border-radius: 100%;
-    padding: 14px;
-    margin: 10px;
-    animation: rotate-middle 3s infinite linear;
-}
-
-.inner{
-    border-top: 1px solid yellow;
-    border-bottom: 1px solid yellow;
-    border-radius: 100%;
-    padding: 25px;
-    margin: 0px;
-    animation: rotate-inner 3s infinite linear;
-}
-
-/*Text AREA*/
-
-.text{
-    width: 100px;
-    height: 80px;
-    text-align: center;
-}
-
-#loading{
-    color: yellow;
-    font-family: robotic;
-}
-
-/*ANIMATIONS*/
-
-@keyframes rotate-outer {
-    0%{
-        transform: rotate(360deg);
-    }
-}
-
-@keyframes rotate-middle {
-    from{
-        transform: rotate(0deg);
-    }
-    to {
-        transform: rotate(360deg);
-    }
-}
-
-@keyframes rotate-inner {
-    0%{
-        transform: rotate(360deg);
-    }
+  .pl-bar span { animation-duration: 5s; }
 }
